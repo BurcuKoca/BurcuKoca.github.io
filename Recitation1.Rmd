@@ -1,3 +1,7 @@
+<!DOCTYPE html>
+<html>
+<body>
+
 ---
 title: "Stat412 Recitation 1"
 author: "Guler, B.K."
@@ -519,3 +523,7 @@ Cohen, Y., & Cohen, J. Y. (2008). Statistics and Data with R: An applied approac
 Mount, J., & Zumel, N. (2019). Practical data science with R. Simon and Schuster.
 
 Yozgatlıgil,C. (2024). Stat 412-Lecture Notes.
+
+
+</body>
+</html>
