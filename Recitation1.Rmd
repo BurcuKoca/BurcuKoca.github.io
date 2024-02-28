@@ -1,0 +1,521 @@
+---
+title: "Stat412 Recitation 1"
+author: "Guler, B.K."
+date: "March 29, 2024"
+output:   
+  html_document: 
+    theme: readable
+    highlight: kate
+    code_folding: hide
+    toc: true
+    toc_float:
+      :collapsed: true
+      smooth_scroll: false
+    toc_depth: 5
+---
+
+```{=html}
+<style>
+h1.title {
+  font-size: 20px;
+  color: DarkRed;
+}
+h3 { /* Header 3 */
+  font-size: 20px;
+  color: DarkBlue;
+}
+h4 { /* Header 4 */
+  font-size: 20px;
+  color: DarkBlue;
+}
+h5 { /* Header 5 */
+  font-size: 20px;
+  color: DarkBlue;
+}
+
+body {
+  color: black;
+  font-family: Calibri;
+  background-color: #F8F8FF;
+}
+
+pre {
+  color: black;
+  font-family: Calibri;
+  background-color: #F8F8FF;
+  border-color: red;
+}
+</style>
+
+```
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### **Introduction to Statistical Data Analysis**
+
+There are numerous real-life examples that exemplify the practical application of data analysis. 
+What are the most common platforms or systems implementing statistical data analysis?
+
+More well-known examples can be listed below:
+
+-   Amazon's product recommendation systems\
+-   Google's advertisement valuation systems\
+-   LinkedIn's contact recommendation system\
+-   Twitter's trending topics\
+-   Movie suggestion on Netflix\
+-   Course signals system in Purdue University\
+-   any many more...
+
+
+Let's have a look at data analysis stages!
+
+```{r, echo=FALSE,  out.width = '70%'}
+knitr::include_graphics("workflow2.png")
+```
+
+
+Data summary and visualization are essential in the initial steps of data analysis. They offer a quick overview, helping analysts understand data patterns and detect outliers. Instead of looking at numbers and words, we can see charts, graphs, and pictures that show us what the information means. This is helpful in many areas. For example, when we analyze data, visualizations let us see patterns and trends. In business, charts help people quickly understand important numbers. Even in science, pictures help researchers explain their discoveries. So, no matter what we are working on, visualization makes information clearer and helps us make better decisions.
+
+Let's continue by understanding and visualizing the dataset.
+
+### **An In-Depth Introduction to the Dataset**
+
+-   Loading the data
+
+At the beginning, we need to load "gpa" data set to R using the following command:
+
+```{r}
+library(openintro)
+data("gpa")
+```
+
+Data Info:
+A survey of 55 Duke University students asked about their GPA, number of hours they study at night, number of nights they go out, and their gender.
+
+A data frame with 55 observations on the following 5 variables.
+
+- gpa: a numeric vector
+- studyweek: a numeric vector
+- sleepnight: a numeric vector
+- out: a numeric vector
+- gender: a factor with levels: female/male
+
+
+To see the first 10 observations of the data, "head" command is run.
+
+```{r}
+head(gpa,10)
+```
+
+**REMINDER:** Different statistical methods are appropriate for different types of data. Moreover, different statistical analyses require different representations of the same data.
+
+R programming language has several data objects:
+
+-   vectors (have a dimension 1 and a length of at least 0 \>\> e.g. v[i]),
+-   lists (are objects that can contain any arbitrary objects and the contents of a list are not restricted to a single mode.),
+-   matrices (are two-dimensional arrays \>\> m[i,j]),
+-   arrays(generalize the concept of the vectors and have k-dimensions \>\> a[i1,i2,...,ik]),
+-   data frames (are in between matrices(since they can contain columns of different modes) and lists(since they are required to have a rectangular structure). **Moreover, many functions in R use data frames as the starting point for analysis. For this reason, putting your data into data frames before analysis is highly recommended!**),
+-   tibbles(are like data frames, but they change a few things to make life simpler. They do less, i.e. they don’t change variable names or types, and don’t do partial matching, and complain more, e.g. when a variable does not exist.) and so on.
+
+Determine the class of the object gpa:
+
+```{r}
+class(gpa)
+```
+
+The data "gpa" has a structure of tibble. We may prefer to convert it to the most common object, which is a data frame.
+
+```{r}
+gpa=as.data.frame(gpa)
+class(gpa)
+```
+
+Moreover, we can use "dim()" function to check the dimension of the data set. The data has 55 rows and 5 columns. In order words, the data includes 55 observations and 5 variables.
+
+```{r}
+dim(gpa)
+```
+
+We prefer to extend the data set to show more visualization techniques. For example, student's state with four levels and taught having elective course during the current semester with three levels are added. By doing this, we set the random number generator ("set.seed()") and use "sample()" function.
+
+For the variable called "state", assume that there are 4 states that students may come from, which are State A, State B, State C and State D.
+
+Additionally, for the variable called "elective", assume that,\
+1: Yes (Certainly, the student will take the elective course)\
+2: No (Certainly, the student will not take elective course)\
+3: Maybe( The student may take the elective course but it hasn't decided yet)
+
+```{r}
+set.seed(1)
+gpa[,c("state","elective")]=c(sample(c(1,2,3,4), 55,  replace=TRUE),sample(c(1,2,3), 55, replace=TRUE))
+head(gpa,10)
+```
+
+Let's get more insights about the data. To provide the type of any variables, you can prefer to use "is.(factor/character/numeric/integer etc.)()" and "class()".
+
+```{r}
+is.factor(gpa$gender)
+is.integer(gpa$studyweek)
+
+class(gpa$state)
+class(gpa$elective)
+```
+
+If any variable is not matched with your expectations, you can change the data type by using the command "as.(factor/character/numeric/integer etc.)()".
+
+```{r}
+gpa$state=as.factor(gpa$state)
+gpa$elective=as.factor(gpa$elective)
+```
+
+The command "str()" quickly provides information about the data types of all variables, offering a more efficient and straightforward method to understand variable types.
+
+```{r}
+str(gpa)
+```
+
+#### **Descriptive statistics**
+
+The easiest way to provide summary statistics is to use "summary()" function. The function "summary()" gives us descriptive stats for all the variables. If you would like to see descriptive stats only for specific variables, you can use "sapply()" command.
+
+```{r}
+summary(gpa)
+sapply(gpa[, c(1,2,3)], mean)
+sapply(gpa[, -c(5,6,7)], var)
+sapply(gpa[, c(1,2)], max)
+sapply(gpa[, c("gpa","studyweek","out")], quantile)
+```
+
+It seems that there is a problematic observation in gpa, since the scale of gpa is assumed to be between 0 and 4. The max point of gpa in our data set is 4.67. Firstly, let's check whether it is the only one or there are additional such observations.
+
+```{r}
+gpa[gpa[,"gpa"]>4.000,]
+```
+
+4.67 is the only outlier for gpa. For future steps, it is good to remind it.
+
+#### **Visualization Techniques**
+
+Let's start with the simple visualization techniques. Caution: **Do not underestimate the power of the basic visualization**!
+
+##### **Bar-plot**
+
+-   STATE vs GENDER
+
+Research Question (RQ): How do gender frequencies vary across different states?
+
+To have more insights about the frequencies of the categorical levels, we can use the command "table()".
+
+```{r}
+gen_st_tab=table(gpa$gender,gpa$state)
+gen_st_tab
+par(bg = "#F8F8FF")
+barplot(gen_st_tab,main="Frequencies of Gender by States", xlab="States",
+        ylab="Frequency", beside=TRUE,col=c("darkblue","darkorange"),legend = c("Female","Male"))
+```
+
+According to the barplot, the number of female students in each state is generally significantly higher than the number of male students. This indicates a diversity in gender distribution among different states. For instance, in the state 1, the number of female students is notably higher compared to other states. However, as we move to the state 4, this difference seems to decrease.
+
+-   STATE
+
+RQ: How does the frequency distribution of values across different states change across the four categories (1, 2, 3, 4)?
+
+```{r}
+st_tab=table(gpa$state)
+st_tab
+library(RColorBrewer)
+mypalette<-brewer.pal(4,"Set3")
+par(bg = "#F8F8FF")
+barplot(st_tab,main="Frequency Distribution of The States", xlab="States",
+        ylab="Frequency", col=mypalette, names.arg=c("A", "B", "C","D"),cex.names=0.8
+        ,legend = c("State A","State B","State C","State D"))
+```
+
+The bar plot indicates how frequently each category occurs in various states. It's clear that state A is the most common, whereas State D is the least common. This visual representation allows for a quick comparison of category occurrences in different states.
+
+-   STATE vs ELECTIVE
+
+RQ: How do elective choices vary across different states? RQ1: Which elective options (yes, no, maybe) are more common in specific states? RQ2: Does the distribution differ significantly among states?
+
+```{r}
+par(mfrow=c(1,2))
+st_el_tab=table(gpa$state,gpa$elective)
+st_el_tab
+mypalette3<-brewer.pal(4,"Set3")
+par(bg = "#F8F8FF")
+barplot(st_el_tab,main="States and Elective Course", xlab="Taughts",names.arg=c("Yes", "No", "Maybe"), ylab="Frequency",col=mypalette3)
+par(bg = "#F8F8FF")
+barplot(st_el_tab,main="States and Elective Course", names.arg=c("Yes", "No", "Maybe"), xlab="Taughts", ylab="Frequency",col=mypalette3, beside=TRUE,legend.text = c("State A","State B","State C","State D"),args.legend = list(x = "topright",inset = c(- 0.05, -0.08),cex=0.50))
+```
+
+The barplot represents the frequencies of four states across different elective categories. Looking at each bar, we observe how the distribution varies for each states across the elective categories. For instance, in State A, elective category "no" has the highest frequency, followed by State B and elective category "maybe". In addition to that, in State D, the number of students considering an elective course is the same for each category.
+
+##### **Histogram and Density-plot**
+
+-   SLEEPING HOURS
+
+RQ: What is the distribution of sleeping hours in the observed population, and how can we interpret the patterns or variations revealed by the histogram and density plot?
+
+```{r}
+par(mfrow=c(2,2))
+par(bg = "#F8F8FF")
+sleep_hist1=hist(gpa$sleepnight,main="Histogram of Sleeping Hours",xlab="Sleeping Hours",col="darkmagenta")  #without breaks
+sleep_hist1$breaks
+
+sleep_hist2=hist(gpa$sleepnight,main="Histogram of Sleeping Hours",xlab="Sleeping Hours",col="darkmagenta",breaks=1)  
+sleep_hist2$breaks
+
+sleep_hist3=hist(gpa$sleepnight,main="Histogram of Sleeping Hours",xlab="Sleeping Hours",col="darkmagenta",breaks=2)  #breaks=Scott or breaks="FD": suggest the optimum breaks
+sleep_hist3$breaks
+
+sleep_hist4=hist(gpa$sleepnight,main="Histogram of Sleeping Hours",xlab="Sleeping Hours",col="darkmagenta",breaks="Scott")  #breaks=Scott or breaks="FD": suggest the optimum breaks
+
+sleep_hist4$counts
+sleep_hist4$breaks
+sleep_hist4$mids
+sleep_hist4$density
+```
+
+The histogram visually represents the distribution of sleeping habits, divided into specific intervals. The highest frequency is observed in the 6-7 hours interval, which means that a significant portion of the students favors a moderate sleep duration. The lower frequency in the 8-9 hours interval suggests that this duration is less commonly preferred within the students. This infrequency implies that a smaller portion of the students leans towards a longer sleep duration, perhaps due to personal preferences or specific lifestyle factors.
+
+```{r}
+den_sleep=density(gpa$sleepnight)  #bandwidth: a smoothing parameter: large bandwidths produce very smooth estimates, small values produce wiggly estimates (like perfect fit). 
+den_sleep2=density(gpa$sleepnight,bw=0.1) 
+den_sleep3=density(gpa$sleepnight,bw=0.5) 
+den_sleep4=density(gpa$sleepnight,bw=0.7) 
+
+par(bg = "#F8F8FF")
+par(mfrow=c(2,2))
+plot(den_sleep,main="Density Plot of Sleeping Hours",type="l",col="red",lwd=3)
+plot(den_sleep2,main="Density Plot of Sleeping Hours",type="l",col="red",lwd=3)
+plot(den_sleep3,main="Density Plot of Sleeping Hours",type="l",col="red",lwd=3)
+plot(den_sleep4,main="Density Plot of Sleeping Hours",type="l",col="red",lwd=3)
+```
+
+```{r}
+par(bg = "#F8F8FF")
+hist(gpa$sleepnight,main="Histogram of the Number of Hours Sleeping",xlab="Sleeping Hours",col="darkmagenta",prob=TRUE,breaks="Scott")
+lines(den_sleep,col="red",type="l",lwd=3)
+```
+
+```{r}
+library(sm)
+par(bg = "#F8F8FF")
+sm.density.compare(gpa$sleepnight, gpa$gender,lwd=3,xlab="Sleeping hours")    
+title(main="Density Plot of Sleeping Hours by Gender")
+legend("topleft", levels(gpa$gender), col = 2:4, lty = 1:2,lwd=2) 
+```
+
+##### **Box-plot**
+
+-   GPA
+
+RQ1: How does the distribution of GPA vary among the observed population? RQ2: What insights can a box-plot provide regarding the central tendency, spread, and potential outliers in GPA scores?
+
+```{r}
+par(bg = "#F8F8FF")
+box_p=boxplot(gpa$gpa, main="Box plot of GPAs", xlab="GPAs",col="burlywood1",horizontal=TRUE)
+box_p
+```
+
+It seems that the median GPA score within the students is approximately 3.7 by looking at the plot. The box's width shows how GPA scores are spread out. A wider box means there's a mix of different GPA scores among students, with some noticeable differences. The points outside the 'whiskers' potentially represent outliers. A GPA score like 4.67 appears significantly deviated from the overall distribution, indicating that this particular student has a notably higher or lower GPA compared to the majority.
+
+```{r}
+par(bg = "#F8F8FF")
+box_p=boxplot(gpa[-16,]$gpa, main="Box plot of GPAs", xlab="GPAs",col="burlywood1",horizontal=TRUE)
+box_p
+```
+
+-   GPA, STUDY HOURS and SLEEPING HOURS
+
+```{r}
+par(mfrow=c(1,3))
+par(bg = "#F8F8FF")
+boxplot(gpa$gpa, main="Box plot of GPAs", ylab="GPAs",col="burlywood1",horizontal=FALSE)
+boxplot(gpa$studyweek, main="Box plot of Study Hours", ylab="Study Hours",col="lightcyan",horizontal=FALSE)
+boxplot(gpa$sleepnight, main="Box plot of Sleep Night", ylab="Sleep Night",col="thistle1",horizontal=FALSE)
+```
+
+-   GPA by STATE
+
+```{r}
+mypalette1=brewer.pal(4,"Spectral")
+par(bg = "#F8F8FF")
+boxplot(gpa$gpa~gpa$state, main="Box plot of GPAs by States", xlab="GPAs",col=mypalette1,horizontal=TRUE,ylab=" ", names=c("State A","State B","State C","State D"))
+legend("topright", legend = c("State A","State B","State C","State D") , 
+    col=mypalette1 , pch=20 , pt.cex = 2, cex = 1, horiz = FALSE)
+```
+
+State A: The median is approximately around 3.65. GPA scores seem to have a wide range as indicated by the broad box, and there is an outlier. The outlier suggests a specific student in this state has significantly different GPA scores compared to the majority.
+
+State B: The median is approximately around 3.5. An outlier which is 4.67 is observed.
+
+State C: The median is approximately around 3.7. No outliers are observed, indicating a more consistent distribution of student scores. GPA scores are generally concentrated in a higher range, as indicated by the higher box.
+
+State D: The median is approximately around 3.7 like State C. No outliers are observed, suggesting overall consistent performance among students.
+
+##### **Scatter-plot**
+
+-   GPA and STUDY HOURS
+
+RQ1: What relationship does GPA (Grade Point Average) have with study hours? RQ2: How does the distribution of study hours impact academic performance?
+
+```{r}
+par(bg = "#F8F8FF")
+plot(studyweek~gpa , data=gpa,
+   xlab="GPAs", ylab="Number of Hours Studying",
+   main="Scatter Plot of Studying Hours vs GPAs",pch=5)  #pch: type
+```
+
+It seems that there is no obvious correlation between these two variables gpa and study hours.
+
+**REMINDER:**
+
+```{r, echo=FALSE,  out.width = '90%'}
+knitr::include_graphics("scatter-plot.jpg")
+```
+
+
+
+The scatter-plot without the outlier 4.67 for gpa:
+
+```{r}
+par(bg = "#F8F8FF")
+plot( studyweek~gpa , data=gpa[-16,],
+   xlab="GPAs", ylab="Number of Hours Studying",
+   main="Scatter Plot of Studying Hours vs GPAs", pch=4, cex=1.5,lwd=4) #cex=size;lwd= thickness
+```
+
+##### **Spine-plot**
+
+```{r}
+par(bg = "#F8F8FF")
+spineplot(gpa$state,gpa$gender,col = c("#07798D", "#7BCB9F"),xlab="States", ylab="Gender",main="Spine-plot for states and gender")
+```
+
+
+
+##### **Mosaic-plot**
+
+```{r}
+library(vcd)
+par(bg = "#F8F8FF")
+mosaic( ~ state+gender+elective, data = gpa,highlighting = "gender", highlighting_fill = c("#07798D", "#7BCB9F"),direction = c("v","h","v"), main="Mosaic-plot for state, gender and elective")  
+#direction = c("v","h","v"): changes the position of variables
+```
+
+Comment examples:
+
+- The elective course preferences of male students from State 4 are at the same rate.
+- All students from State 1 who want to take elective courses are female. Similarly, all students from State 3 who will definitely take or definitely not take elective courses are female.
+- The ratio of males to females who will not take elective courses from State 2 appears to be the same.
+
+**REMINDER:**
+
+Difference between spine-chart and mosaic-plot: Mosaic-plot is the multidimensional extension of spine-chart. Spine-plots are used for only two variables.
+
+
+##### **Correlation-plot**
+
+-   GPA, STUDY HOURS, SLEEPING HOURS and GOING OUT
+
+RQ: Is there a statistically significant correlation among GPA, study hours, sleeping hours, and time spent going out?
+
+```{r}
+par(mfrow=c(1,3))
+par(bg = "#F8F8FF")
+library(corrplot)
+corr_num = cor(gpa[,c(1,2,3,4)])
+corrplot(corr_num)
+corrplot(corr_num, method = 'number',col=brewer.pal(n=10, name="Set3"),tl.srt=45) #tl.srt: rotate 45'degree
+corrplot(corr_num, method = 'color', type="lower") #type: lower triangle
+
+```
+
+
+#### **Small exercise with additional data**
+
+Comment on the shape of variable X.
+
+```{r}
+library(FamilyRank)
+set.seed(1)
+x=rbinorm(100, 2, 20, 2, 2, prop=0.5)
+par(bg = "#F8F8FF")
+par(mfrow=c(1,2))
+plot(density(x),main="Density plot of the variable X",type="l",col="darkred",lwd=3)
+hist(x,main="Histogram of variable X", col="darkred",breaks="FD")
+```
+
+Then, draw the box-plot of variable X and comment on it. 
+
+```{r}
+par(bg = "#F8F8FF")
+boxplot(x, main="Box plot of the variable X", col="darkred",horizontal=TRUE)
+```
+
+What insight do you get from the histogram and the density-plot, but not from the box-plot? 
+
+
+
+### **Additional Info**
+
+Comment on the graph below. Is this a nice one or not? Is it enough for the visualization? What inferences can be drawn from the graph? What insights can be gained regarding it? 
+
+```{r}
+gen_st_tab=table(gpa$gender,gpa$state)
+par(bg = "#F8F8FF")
+barplot(gen_st_tab)
+```
+
+What are the main/effective elements of graphs?
+
+- Title
+- Axis Labels
+- Color
+- Legend
+
+More (if appropriate):
+
+- Trendlines
+- Reference about the data
+- Grid lines (for comparability)
+- and many more...
+
+**But before that, make sure that you select the right visualization techniques!**
+
+Compare the graphs given below. Both represents the same data. Which one is more effective and feasible?
+
+```{r}
+par(mfrow=c(1,2))
+par(bg = "#F8F8FF")
+barplot(gen_st_tab)
+barplot(gen_st_tab,main="Frequencies of Gender by States", xlab="States",
+        ylab="Frequency", beside=TRUE,col=c("darkblue","darkorange"),names.arg=c("A", "B", "C","D"),cex.names=0.8,legend = c("Female","Male"))
+```
+
+
+Info about color in R: 
+
+We may draw more effective and useful plots by using various colors. In addition to default colors, R has several color palettes. One of the most common ones is "RColorBrewer". The default color palette and RColorBrewer palette are shown below for effective and nice graphs:
+
+```{r, echo=FALSE,  out.width = '60%'}
+knitr::include_graphics("colorbynames.png")
+```
+
+```{r, echo=FALSE,  out.width = '30%'}
+knitr::include_graphics("RBrewerPalette.png")
+```
+
+
+References:
+
+<https://www.latestquality.com/interpreting-a-scatter-plot/>
+
+Cohen, Y., & Cohen, J. Y. (2008). Statistics and Data with R: An applied approach through examples. John Wiley & Sons.
+
+Mount, J., & Zumel, N. (2019). Practical data science with R. Simon and Schuster.
+
+Yozgatlıgil,C. (2024). Stat 412-Lecture Notes.
